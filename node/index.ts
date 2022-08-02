@@ -1,8 +1,9 @@
-import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
+import type { ClientsConfig, ServiceContext } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
 import { demo } from './middlewares/demo'
+import { getUniversities } from './resolvers/universities'
 
 const TIMEOUT_MS = 2000
 
@@ -31,12 +32,7 @@ const clients: ClientsConfig<Clients> = {
 
 declare global {
   // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
-  type Context = ServiceContext<Clients, State>
-
-  // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
-  interface State extends RecorderState {
-    code: number
-  }
+  type Context = ServiceContext<Clients>
 }
 
 // Export a service that defines route handlers and client options.
@@ -47,5 +43,12 @@ export default new Service({
     demo: method({
       GET: [demo],
     }),
+  },
+  graphql: {
+    resolvers: {
+      Query: {
+        getUniversities,
+      },
+    },
   },
 })
